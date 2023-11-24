@@ -70,6 +70,21 @@ ghci> myTakeDrop (<9) []
 
 
 ## 問題2
+### 再帰でpoly
+```
+recursive_poly :: [Int] -> Int -> Int
+recursive_poly [] _ = 0
+recursive_poly (x:xs) v = (x * v ^ (length xs)) + recursive_poly xs v
+----------
+ghci> recursive_poly [2,3,4] 2
+18
+ghci> recursive_poly [] 2
+0
+```
+- 当たれられたリストの初項の値を計算し、後ろの項は再帰呼び出しすることで足していく
+- 空リストが与えられたときは、0にすると仕様定義した
+  - `recursive_poly [] _ = 0`が無くて、網羅的でないパターンだと怒られた
+
 ## 問題3
 ## 問題4
 ## 問題5
