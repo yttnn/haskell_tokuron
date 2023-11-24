@@ -86,6 +86,28 @@ ghci> recursive_poly [] 2
   - `recursive_poly [] _ = 0`が無くて、網羅的でないパターンだと怒られた
 
 ## 問題3
+### merge3
+- 2つのリストをくっつけるmeger2を作るという案で行く
+  - merge2はx,yの大小で分岐し、x,yが同じ値の時は、2度同じ値を入れないように注意
+- さらにそのmerge2を、merge3から2回呼ぶことで動作を実現する
+```
+merge2 :: Ord a => [a] -> [a] -> [a]
+merge2 x [] = x
+merge2 [] y = y
+merge2 (x:xs) (y:ys) | x < y = x : merge2 xs (y:ys)
+                     | x == y = x : merge2 xs ys
+                     | otherwise = y : merge2 (x:xs) ys
+
+merge3 :: Ord a => [a] -> [a] -> [a] -> [a]
+merge3 x y z = merge2 x (merge2 y z)
+-----------
+ghci> merge3 [1,4,7] [2,5,8] [3,5,9]
+[1,2,3,4,5,7,8,9]
+ghci> merge3 [1,8,9] [1,2,3,4,7] [2,5,6,10]
+[1,2,3,4,5,6,7,8,9,10]
+```
+- 3並列のときは、2並列を2回やるとよい、という教訓を活かせた
+
 ## 問題4
 ## 問題5
 ## 問題6
