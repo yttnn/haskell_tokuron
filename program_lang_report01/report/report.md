@@ -111,8 +111,35 @@ ghci> merge3 [1,8,9] [1,2,3,4,7] [2,5,6,10]
 [1,2,3,4,5,6,7,8,9,10]
 ```
 - 3並列のときは、2並列を2回やるとよい、という教訓を活かせた
+- merge2を思いついた時、とても気持ちよかった
 
 ## 問題4
+全く分からなかったので、後輩の渡邉こうきくんに完全に教えてもらいました
+### takeXiyjzk
+- 本体の定義は以下の通り
+- dropWhileが使われているのは、kの値が大きくなると、オーバーフローして負の値が答えの配列の最初に入ってしまうため
+```
+takeXiyjzk :: Int -> Int -> Int -> Int -> [Int]
+takeXiyjzk 0 x y z = []
+takeXiyjzk k x y z = take k (dropWhile (< 1) (takeAs k x y z [1] [1] [1]))
+---------
+ghci> takeXiyjzk 10 2 3 5
+[1,2,3,4,5,6,8,9,10,12]
+```
+- takeAsは以下の通り
+- 今のxyzと、再帰呼び出ししたtakeAsをマージする。ここで重複が消える
+  - 再帰呼び出ししたtakeAsは、今のxyzにそれぞれa,b,c乗したものを計算してマージする
+```
+takeAs :: Int -> Int -> Int -> Int -> [Int] -> [Int] -> [Int] -> [Int]
+takeAs 0 _ _ _ _ _ _ = [1]
+takeAs k a b c x y z = merge2 (merge3 x y z) (takeAs (k-1) a b c (map (* a) (merge3 x y z))
+                                                                 (map (* b) (merge3 x y z))
+                                                                 (map (* c) (merge3 x y z)))
+```
+本当にこんなのよく思いついたな、と思いました
+渡邉こうきくん曰く、渾身の出来だそうです
+### between
+時間ないので諦めます...
 ## 問題5
 ### 最大部分列の計算量
 - 全探索すると、整数リストのi番目からj番目(i < j) までの和を順に求めるため、O(N^2)
@@ -124,6 +151,8 @@ ghci> merge3 [1,8,9] [1,2,3,4,7] [2,5,6,10]
 ## 問題6
 ### (1)片側だけでもいい二分木を定義
 - 片側しかない場合のBENode1を定義することで実現した
+  - 後輩と、Node1の時、この実装だと左右の区別できないのではという議論になった
+  - 僕は、二分木自体が左右の区別をしないため、このような実装にした
 - 両側ある場合はBENode2とした
 ```
 data BETree a = BELeaf a 
@@ -174,4 +203,43 @@ upAccBETree (BENode2 a tl tr) = (BENode2 (a + (sumBETree tl) + (sumBETree tr)) (
 ghci> upAccBETree (BENode2 5 (BENode2 8 (BELeaf 3) (BENode1 1 (BELeaf 7))) (BENode2 6 (BENode1 2 (BELeaf 9)) (BELeaf 4)))
 BENode2 45 (BENode2 19 (BELeaf 3) (BENode1 8 (BELeaf 7))) (BENode2 21 (BENode1 11 (BELeaf 9)) (BELeaf 4))
 ```
+### (3)(4) cataBETreeで実装
+```
+cataBETree :: (a -> b) -> (a -> b -> b) -> (a -> b -> b -> b) -> BETree a -> b
+cataBETree f g h (BELeaf x) = f x
+cataBETree f g h (BENode1 x t) = g x (cataBETree f g h t) 
+cataBETree f g h (BENode2 x tl tr) = h x (cataBETree f g h tl) (cataBETree f g h tr)
+```
+#### depthBETree
+- fが適用される場合、`cataBETree f g h (BELeaf x) = f x`を見る
+  - 今回は、0を返すだけである
+- gが適用される場合、`cataBETree f g h (BENode1 x t) = g x (cataBETree f g h t) `を見る
+  - 今回は、+1する
+- hが適用される場合、`cataBETree f g h (BENode2 x tl tr) = h x (cataBETree f g h tl) (cataBETree f g h tr)`を見る
+  - 今回は、yが`(cataBETree f g h tl)`に対応しているため、+1する。
+  - その後、max
+```
+depthBETree :: BETree t -> Int
+depthBETree t = cataBETree (\x -> 0) (\x y -> y + 1) (\x y z -> max (y+1) (z+1)) t
+----------
+ghci> depthBETree (BENode2 5 (BENode2 8 (BELeaf 3) (BENode1 1 (BELeaf 7))) (BENode2 6 (BENode1 2 (BELeaf 9)) (BELeaf 4)))
+3
+```
+#### sumBETree
+- fが適用される場合、`cataBETree f g h (BELeaf x) = f x`を見る
+  - 今回はxを返すだけ
+- gが適用される場合、`cataBETree f g h (BENode1 x t) = g x (cataBETree f g h t) `を見る
+  - 今回は、xにcataBETree(sumBETree)を足していく
+- hが適用される場合、`cataBETree f g h (BENode2 x tl tr) = h x (cataBETree f g h tl) (cataBETree f g h tr)`を見る
+  - 今回は、xにcataBETree(sumBETree)を足していく
+```
+sumBETree :: Num t => BETree t -> t
+sumBETree t = cataBETree (\x -> x) (\x y -> x + y) (\x y z -> x + y + z) t
+---------------
+ghci> sumBETree (BENode2 5 (BENode2 8 (BELeaf 3) (BENode1 1 (BELeaf 7))) (BENode2 6 (BENode1 2 (BELeaf 9)) (BELeaf 4)))
+45
+```
+#### upAccBETree
+- 時間ないので諦めました...
 ## 問題7
+- 時間ないので諦めました...
