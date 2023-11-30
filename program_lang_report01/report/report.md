@@ -1,9 +1,8 @@
----
-title: レポート
-date: 2020-05-07
-author: frozenbonito
----
 # プログラム言語特論 レポート1
+author : M1 丹野雄太\
+number : 4555235023\
+date : 2023-11-30
+<div style="page-break-before:always"></div>
 
 ## 目次
 - [問題1](#問題1)
