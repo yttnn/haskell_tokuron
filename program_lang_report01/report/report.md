@@ -1,5 +1,9 @@
+---
+title: レポート
+date: 2020-05-07
+author: frozenbonito
+---
 # プログラム言語特論 レポート1
-author : 4555235023 丹野雄太
 
 ## 目次
 - [問題1](#問題1)
@@ -118,4 +122,56 @@ ghci> merge3 [1,8,9] [1,2,3,4,7] [2,5,6,10]
 - kadaneは適用できない気がするため、全探索で実装する
 
 ## 問題6
+### (1)片側だけでもいい二分木を定義
+- 片側しかない場合のBENode1を定義することで実現した
+- 両側ある場合はBENode2とした
+```
+data BETree a = BELeaf a 
+              | BENode1 a (BETree a)
+              | BENode2 a (BETree a) (BETree a)
+              deriving(Show)
+```
+### (2)3つの関数を作成
+#### depthBETree
+- 関数の目的は、引数の木t以下の深さを計算して返すこと
+- Leafのときは、深さはカウントしない。
+- Nodeの時は、深さカウントを1増やす
+  - 今回は深さの最大値を求めたいため、Node2の時は大きい方の値を使用する
+```
+depthBETree :: BETree t -> Int
+depthBETree (BELeaf a) = 0
+depthBETree (BENode1 a t) = (depthBETree t) + 1
+depthBETree (BENode2 a tl tr) = max (depthBETree tl + 1) (depthBETree tr + 1)
+---------------
+ghci> depthBETree (BENode2 5 (BENode2 8 (BELeaf 3) (BENode1 1 (BELeaf 7))) (BENode2 6 (BENode1 2 (BELeaf 9)) (BELeaf 4)))
+3
+```
+#### sumBETree
+- 関数の目的は、引数の木t以下の和を返すこと
+- Leafの時は、足すものもないので、その値を返す
+- Nodeの時は、自分の値を足しつつ、子のノードを再帰呼び出しし、その返り値を足す
+```
+sumBETree :: Num t => BETree t -> t
+sumBETree (BELeaf a) = a
+sumBETree (BENode1 a t) = a + (sumBETree t)
+sumBETree (BENode2 a tl tr) = a + sumBETree tl + sumBETree tr
+-------------
+ghci> sumBETree (BENode2 5 (BENode2 8 (BELeaf 3) (BENode1 1 (BELeaf 7))) (BENode2 6 (BENode1 2 (BELeaf 9)) (BELeaf 4)))
+45
+```
+#### upAccBETree
+- 関数の目的は、引数の木t以下に所定の計算をすること
+- Leafのときは、そのままLeafを返す
+- Nodeの時は、引数の木以下の和に自分の値を足したものを自分の値にする。
+- 更に、下にupAccを伝播させるために再帰呼び出しする
+  - これを忘れていて、後輩の渡邉くんと野村くんに教えてもらった
+```
+upAccBETree :: Num t => BETree t -> BETree t
+upAccBETree (BELeaf a) = (BELeaf a)
+upAccBETree (BENode1 a t) = (BENode1 (a + (sumBETree t)) (upAccBETree t))
+upAccBETree (BENode2 a tl tr) = (BENode2 (a + (sumBETree tl) + (sumBETree tr)) (upAccBETree tl) (upAccBETree tr))
+-------
+ghci> upAccBETree (BENode2 5 (BENode2 8 (BELeaf 3) (BENode1 1 (BELeaf 7))) (BENode2 6 (BENode1 2 (BELeaf 9)) (BELeaf 4)))
+BENode2 45 (BENode2 19 (BELeaf 3) (BENode1 8 (BELeaf 7))) (BENode2 21 (BENode1 11 (BELeaf 9)) (BELeaf 4))
+```
 ## 問題7
