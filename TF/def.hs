@@ -1,28 +1,28 @@
-data Expr = Num Int
-          | Var Variable
-          | Apply Expr Expr         -- 関数適用
-          | Bexpr BinOp Expr Expr   -- 二項演算
-          | Rexpr RelOp Expr Expr   -- 関係演算 ><
-          | Fun Variable Expr       -- 関数抽象 lambda
-          | Let Decl Expr           -- let
-          | Letrec Decl Expr        -- letrec
-          | If Expr Expr Expr       -- if
-          | Pr Expr                 -- ! (for debug)
-          deriving (Eq, Show)
+-- data Expr = Num Int
+--           | Var Variable
+--           | Apply Expr Expr         -- 関数適用
+--           | Bexpr BinOp Expr Expr   -- 二項演算
+--           | Rexpr RelOp Expr Expr   -- 関係演算 ><
+--           | Fun Variable Expr       -- 関数抽象 lambda
+--           | Let Decl Expr           -- let
+--           | Letrec Decl Expr        -- letrec
+--           | If Expr Expr Expr       -- if
+--           | Pr Expr                 -- ! (for debug)
+--           deriving (Eq, Show)
 
-type Prog = Expr
+-- type Prog = Expr
 
-type Variable = [Char]
+-- type Variable = [Char]
 
-data Decl = Decl Variable Expr
-            deriving(Eq, Show)
+-- data Decl = Decl Variable Expr
+--             deriving(Eq, Show)
 
-data BinOp = Add | Sub | Mul | deriving
-             deriving(Eq, Show)
+-- data BinOp = Add | Sub | Mul | deriving
+--              deriving(Eq, Show)
 
-data RelOp = MoreThan | MoreThanEqual |
-             LessThan | LessThanEqual
-            deriving(Eq, Show)
+-- data RelOp = MoreThan | MoreThanEqual |
+--              LessThan | LessThanEqual
+--             deriving(Eq, Show)
 
 
 -- 値
