@@ -39,3 +39,16 @@ relop Equal m n = (m == n)
 relop NotEqual m n = (m != n)
 relop LessThan m n = (m < n)
 relop LessThanEqual m n = (m <= n)
+
+
+-- 環境
+type Env = Assoc Variable Val -- 変数名と変数値
+
+emptyEnv :: Env
+emptyEnv = emptyAssoc
+
+lookupEnv :: Variable -> Env -> Maybe Val -- 環境から変数値を探す
+lookupEnv v env = lookupAssoc v env
+
+updateEnv :: Variable -> Val -> Env -> Env -- 環境を更新した新しい環境を返す
+updateEnv v val env = updateAssoc v val env
