@@ -26,3 +26,11 @@ lookupEnv v env = lookupAssocv env
 
 updateEnv :: Variable -> EnvVal -> Env -> Env
 updateEnv v envval env = updateAssoc v envval env
+
+expval :: 
+expval (Var x) env = getval x (lookupEnv x env)
+
+getval :: Variable -> Maybe EnvVal -> Val
+getval var (Just envval) = force envval
+getval var Nothing = error ("getval: " ++ var)
+
