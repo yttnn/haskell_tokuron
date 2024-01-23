@@ -85,6 +85,8 @@ pSFun =
 ghci> parseProg "lambda @x . x * x"
 SFun "x" (Bexpr Mul (Var "x") (Var "x"))
 ```
+- NewParserが提出ページあることを、出す直前に気づいた
+  - `pFormal`がタプルを使うようにして対応していることはわかるが、どんな動作をするのかまったく追跡できないと思った
 ### CBNs.hs改造
 - `expval (Apply ..)`に、`VStrictClosure`の対応をすればよさそうなので、やってみる
 - 変更したコード
