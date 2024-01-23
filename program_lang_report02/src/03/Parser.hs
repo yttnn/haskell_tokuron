@@ -14,7 +14,7 @@ import Data.Char
 --          | if <expr> then <expr> else <expr>
 
 -- <expr> ::= <expr1>
---          | lambda <identifier> . <expr>
+--          | lambda <formal> . <expr>
 --          | let <decl> in <expr>
 --          | letrec <decl> in <expr>
 --          | if <expr> then <expr> else <expr>
@@ -31,6 +31,7 @@ import Data.Char
 --           |  <number>
 --           |  ( <expr> )
 --           |  !<aexpr>    -- for debugging
+-- <formal> ::= [@]<variable>
 
 -- <decl> ::= <variable> = <expr>
 
@@ -142,6 +143,9 @@ pVariable = pSatisfy varName
             where varName :: [Char] -> Bool
                   varName x = isLetter (head x) && not (elem x resWords)
 
+pFormal :: Parser Token Token
+pFormal = (pLiteral "@" `pSeqSnd` pVariable)
+
 resWords :: [[Char]]
 resWords = ["lambda", "let", "letrec", "in", "if", "then", "else"]
 
@@ -152,7 +156,7 @@ pNumber = pSatisfy (isDigit . head)
 
 pProg, pExpr :: Parser Token Expr
 pProg = pExpr
-pExpr = pFoldAlt [pExpr1, pFun, pLet, pLetrec, pIf]
+pExpr = pFoldAlt [pExpr1, pFun, pSFun, pLet, pLetrec, pIf]
 
 pExpr1 :: Parser Token Expr
 pExpr1 = (pExpr2 `pSeq` pExpr1c) `pUsing` opExp Rexpr
@@ -202,6 +206,11 @@ pFun :: Parser Token Expr
 pFun =
   (pLiteral "lambda" `pSeqSnd` pVariable `pSeq` pLiteral "." `pSeqSnd` pExpr)
   `pUsing` uncurry Fun
+
+pSFun :: Parser Token Expr
+pSFun = 
+  (pLiteral "lambda" `pSeqSnd` pFormal `pSeq` pLiteral "." `pSeqSnd` pExpr)
+  `pUsing` uncurry SFun
 
 pLet :: Parser Token Expr
 pLet = (pLiteral "let" `pSeqSnd` pDecl `pSeq` pLiteral "in" `pSeqSnd` pExpr)

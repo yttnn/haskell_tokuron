@@ -13,6 +13,8 @@ showVal (VInt m) = show m
 showVal (VBool b) = show b
 showVal (VClosure v e r) =
   "Closure [lambda " ++ show v ++ " . " ++ show e ++ "]"
+showVal (VStrictClosure v e r) =
+  "StrictClosure [lambda @" ++ show v ++ " . " ++ show e ++ "]"
 
 unwrapInt :: Val -> Int
 unwrapInt (VInt m) = m
@@ -70,12 +72,17 @@ expval (Rexpr o e1 e2) env =
         v2 = expval e2 env
         r = relop o (unwrapInt v1) (unwrapInt v2)
 expval (Fun x e) env = VClosure x e env
-expval (Apply e1 e2) env =
-  f `seq` v `seq` expval body newenv
+expval (SFun x e) env = VStrictClosure x e env
+expval (Apply e1 e2) env
+  | e2 == SFun = f `seq` s `seq` expval s_body s_newenv
+  | otherwise  = f `seq` v `seq` expval v_body v_newenv
   where f = expval e1 env
         v = delay e2 env
-        VClosure x body env' = f
-        newenv = updateEnv x v env'
+        s = expval e2 env
+        VClosure v_x v_body v_env' = f
+        VStrictClosure s_x s_body s_env' = s
+        v_newenv = updateEnv v_x v v_env'
+        s_newenv = updateEnv s_x (Evaled s) s_env'
 expval (Let (Decl x e1) e2) env =
   v `seq` expval e2 newenv
   where v = delay e1 env
