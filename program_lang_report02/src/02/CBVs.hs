@@ -46,6 +46,19 @@ lookupEnv var env = lookupAssoc var env
 updateEnv :: Variable -> Val -> Env -> Env
 updateEnv var val env = updateAssoc var val env
 
+globalEnv :: Env
+globalEnv = foldr addBuiltInFn emptyEnv builtinFns
+  where addBuiltInFn (name, def) env = updateEnv name (evalBuiltInFn def env) env
+
+addBuiltInFn :: [(name, def)] -> Env -> Env
+addBuiltInFn [] env = []
+addBuiltInFn ((name, def):next) env = (updateEnv name  (evalBuiltInFn def env) env):(addBuiltInFn next env)
+
+evalBuiltInFn :: [Char] -> Env -> Val
+evalBuiltInFn def env = expval (parseProg def) env
+
+-- addBuiltInFn ::
+
 -- Evaluation
 expval :: Expr -> Env -> Val
 expval (Num n) env = n `seq` VInt n
@@ -99,15 +112,14 @@ relop LessThan = (<)
 relop LessThanEqual = (<=)
 
 builtinFns :: [([Char], [Char])]
-builtinFns = [
-  ("square", "lambda x . x * x"),
+builtinFns =
+  [("square", "lambda x . x * x"),
   ("fourthPower", "lambda x . square (square x)"),
-  ("abs", "lambda n . if x < 0 then 0 - x else x"),
+  ("abs", "lambda x . if x < 0 then 0 - x else x"),
   ("evenp", "lambda n . if == 0 then True else oddp (n - 1)"),
   ("oddp", "lambda n . if n == 0 then False else evenp (n - 1)"),
   ("True", "0 == 0"),
-  ("False", "0 == 1")
-]
+  ("False", "0 == 1")]
 
 -- Test
 -- ev e = showVal (expval e emptyEnv)
@@ -118,5 +130,6 @@ p3 = "letrec f = lambda x . if x == 0 then 0 else x + f (x - 1) in f 100"
 
 --
 ev :: [Char] -> Val
-ev s = expval (parseProg s) emptyEnv
+-- ev s = expval (parseProg s) emptyEnv
+ev s = expval (parseProg s) globalEnv
 
