@@ -1,7 +1,8 @@
 # プログラム言語特論レポート02
 author : M1 丹野雄太\
 number : 4555235023\
-date   : 2024-01-23
+date   : 2024-01-23\
+repository : https://github.com/yttnn/haskell_tokuron/tree/main/program_lang_report02
 <div style="page-break-before:always"></div>
 
 ## 目次
